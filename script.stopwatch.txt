@@ -1,0 +1,69 @@
+let startTime, elapsedTime = 0, intervalId;
+const timeDisplay = document.getElementById('time-display');
+const startStopBtn = document.getElementById('start-stop-btn');
+const resetBtn = document.getElementById('reset-btn');
+const lapBtn = document.getElementById('lap-btn');
+const lapTimes = document.getElementById('lap-times');
+const currentTimeDisplay = document.getElementById('current-time');
+
+startStopBtn.addEventListener('click', toggleStartStop);
+resetBtn.addEventListener('click', resetStopwatch);
+lapBtn.addEventListener('click', recordLap);
+
+function toggleStartStop() {
+    if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+        startStopBtn.textContent = 'Start';
+    } else {
+        startTime = Date.now() - elapsedTime;
+        intervalId = setInterval(updateTime, 10);
+        startStopBtn.textContent = 'Stop';
+    }
+}
+
+function resetStopwatch() {
+    clearInterval(intervalId);
+    intervalId = null;
+    elapsedTime = 0;
+    timeDisplay.textContent = '00:00:00.000';
+    startStopBtn.textContent = 'Start';
+    lapTimes.innerHTML = '';
+}
+
+function recordLap() {
+    if (intervalId) {
+        const lapTime = formatTime(elapsedTime);
+        const lapElement = document.createElement('div');
+        lapElement.textContent = `Lap ${lapTimes.children.length + 1}: ${lapTime}`;
+        lapTimes.appendChild(lapElement);
+    }
+}
+
+function updateTime() {
+    elapsedTime = Date.now() - startTime;
+    timeDisplay.textContent = formatTime(elapsedTime);
+}
+
+function formatTime(time) {
+    const milliseconds = Math.floor(time % 1000);
+    const seconds = Math.floor((time / 1000) % 60);
+    const minutes = Math.floor((time / (1000 * 60)) % 60);
+    const hours = Math.floor((time / (1000 * 60 * 60)) % 24);
+
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
+}
+
+function updateCurrentTime() {
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(now.getUTCDate()).padStart(2, '0');
+    const hours = String(now.getUTCHours()).padStart(2, '0');
+    const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(now.getUTCSeconds()).padStart(2, '0');
+    currentTimeDisplay.textContent = `Current Date and Time (UTC): ${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+setInterval(updateCurrentTime, 1000);
+updateCurrentTime();  // Initial call to display current time immediately
